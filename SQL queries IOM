@@ -1,0 +1,123 @@
+TYPE
+select COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, 
+      NUMERIC_PRECISION, DATETIME_PRECISION, 
+      IS_NULLABLE
+FROM 
+   INFORMATION_SCHEMA.COLUMNS
+WHERE 
+   TABLE_SCHEMA = 'dbo'
+   AND TABLE_NAME = 'TABLE NAME';
+ 
+--Show query from another database
+EXEC ('SELECT * FROM [database].[dbo].[table]') AT [server-name];
+ 
+ 
+--Help
+EXEC sp_help 'dbo.table';
+
+--RENAME
+EXEC sp_rename 'TABLE NAME.[old_column_name]', 'new_column_name', 'COLUMN';
+
+ 
+---STUFF
+La función STUFF en SQL Server siempre requiere cuatro argumentos:
+La cadena original.
+La posición inicial en la cadena donde quieres comenzar a modificar.
+El número de caracteres que deseas eliminar.
+La cadena que deseas insertar en esa posición.
+ 
+DECLARE @cadena NVARCHAR(50) = 'Hola, mundo!' SELECT STUFF(@cadena, LEN(@cadena), 1, '') AS Resultado
+ 
+ 
+-- CREATE TABLE BASED ON OTHER WITH A WHERE CONDITIONS
+SELECT * INTO [database].[dbo].[table]  
+FROM [database].[dbo].[table]  
+WHERE [COLUMN] >= '';
+ 
+ 
+ADD PRIMARY KEY
+ALTER TABLE dbo.TABLE
+ADDCONSTRAINT [primary_key_name] PRIMARY KEY ([column_with_index_or_PrimaryKey]);
+ 
+ 
+--DROP column
+ALTER TABLE [databse].[dbo].[TABLE]
+DROP COLUMN [column_name];
+ 
+ 
+--ADD column
+ALTER TABLE dbo.TABLE
+ADD [COLUMN] CHAR(100) NULL;
+ 
+ 
+--Show tables in a database
+SELECT TABLE_NAME
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_TYPE = 'BASE TABLE';
+ 
+ 
+--Update rows on a column
+UPDATE [database].[dbo].[table]
+SET   [column] = 'Two or more times'
+WHERE [column] = 'Twice or more';
+ 
+ 
+-- SELECT WITH OPENQUERY
+EXEC ('SELECT * FROM [database_name].[dbo].[table_name] WHERE [column_name] LIKE ''%ttext%''') AT [server_name];
+EXEC ('SELECT * FROM [database_name].[dbo].[table_name] WHERE [column_name] = ''text''') AT [server_name];
+ 
+ 
+-- VIEW ALL TABLES IN A DB
+SELECT TABLE_NAME
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_TYPE = 'BASE TABLE';
+ 
+-- Insert from view to table
+INSERT INTO [database].[dbo].[table]
+SELECT * FROM [database].[dbo].[table];
+ 
+-- Create table from view
+SELECT  *
+INTO [database].[dbo].[table]
+FROM [database].[dbo].[table];
+ 
+ 
+-- Count columns
+SELECT COUNT(*) AS TotalColumnas
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME = 'table';
+ 
+-- DETECT DUPLICATE VALUES IN ROWS
+WITH SplitValues AS (
+   SELECT 
+       _id,
+       LTRIM(RTRIM(value)) AS val
+   FROM [database].[dbo].[table]
+   CROSS APPLY STRING_SPLIT([column], ';')
+)
+SELECT _id
+FROM SplitValues
+GROUP BY _id, val
+HAVING COUNT(*) > 1;
+ 
+-- UPDATE TABLE BASED ON A VIEW
+UPDATE tgt
+SET tgt.[column] = src.[column]
+FROM [database].[dbo].[table] AS tgt
+INNER JOIN [database].[dbo].[table] AS src
+   ON tgt.[column] = src.[column];
+ 
+ 
+ 
+-- Mayusculas la primera letra
+UPPER(LEFT([column], 1)) + LOWER(SUBSTRING([column], 2, LEN([column])))
+ 
+ 
+-- Quitar ; de columna
+UPDATE [database].[dbo].[table]
+   SET [column] = 
+       CASE 
+           WHEN RIGHT(RTRIM([column]), 1) = ';'
+           THEN LEFT(RTRIM([column]), LEN(RTRIM([column])) - 1)
+           ELSE [column]
+       END;
